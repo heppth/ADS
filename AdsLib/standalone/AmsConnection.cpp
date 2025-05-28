@@ -61,7 +61,7 @@ SharedDispatcher AmsConnection::DispatcherListGet(const VirtualConnection& conne
     return {};
 }
 
-AmsConnection::AmsConnection(Router& __router, const struct addrinfo* const destination)
+AmsConnection::AmsConnection(Router& __router, const struct addrinfo* const destination, ReceiveNotificationFunc onNotification)
     : router(__router),
     socket(destination),
     refCount(0),
@@ -69,6 +69,7 @@ AmsConnection::AmsConnection(Router& __router, const struct addrinfo* const dest
     ownIp(socket.Connect())
 {
     receiver = std::thread(&AmsConnection::TryRecv, this);
+    customNotificationHandler = onNotification;
 }
 
 AmsConnection::~AmsConnection()
@@ -261,6 +262,16 @@ void AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft, 
 
 bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 {
+    if (customNotificationHandler)
+    {
+        auto bytesLeft = header.length();
+        uint8_t* buffer = (uint8_t*)malloc(bytesLeft);
+        Receive(buffer, bytesLeft);
+        customNotificationHandler(buffer, bytesLeft);
+        free(buffer);
+        return true;
+    }
+
     const auto dispatcher = DispatcherListGet(VirtualConnection { header.targetPort(), header.sourceAms() });
     if (!dispatcher) {
         ReceiveJunk(header.length());

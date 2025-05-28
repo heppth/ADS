@@ -132,6 +132,14 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
                                        uint32_t                     hUser,
                                        uint32_t*                    pNotification);
 
+
+long AdsSyncAddDeviceNotificationReqLite(long                         port,
+                                       const AmsAddr*               pAddr,
+                                       uint32_t                     indexGroup,
+                                       uint32_t                     indexOffset,
+                                       const AdsNotificationAttrib* pAttrib,
+                                       uint32_t*                    pNotification);
+
 /**
  * A notification defined previously is deleted from an ADS server.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
@@ -159,7 +167,7 @@ namespace ads
  * @param[in] ip address of the target system
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AddLocalRoute(AmsNetId ams, const char* ip);
+long AddLocalRoute(AmsNetId ams, const char* ip, ReceiveNotificationFunc onNotification);
 
 /**
  * Delete ams route that had previously been added with AddLocalRoute().

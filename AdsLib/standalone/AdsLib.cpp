@@ -29,10 +29,10 @@ namespace bhf
 {
 namespace ads
 {
-long AddLocalRoute(const AmsNetId ams, const char* ip)
+long AddLocalRoute(const AmsNetId ams, const char* ip, ReceiveNotificationFunc onNotification)
 {
     try {
-        return GetRouter().AddRoute(ams, ip);
+        return GetRouter().AddRoute(ams, ip, onNotification);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     } catch (const std::runtime_error&) {
@@ -297,6 +297,43 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
             pNotification,
             notify);
     } catch (const std::bad_alloc&) {
+        return GLOBALERR_NO_MEMORY;
+    }
+}
+
+long AdsSyncAddDeviceNotificationReqLite(long                         port,
+                                       const AmsAddr*               pAddr,
+                                       uint32_t                     indexGroup,
+                                       uint32_t                     indexOffset,
+                                       const AdsNotificationAttrib* pAttrib,
+                                       uint32_t*                    pNotification)
+{
+    ASSERT_PORT_AND_AMSADDR(port, pAddr);
+    if (!pAttrib) {
+        return ADSERR_CLIENT_INVALIDPARM;
+    }
+
+    try {
+        AmsRequest request{
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::ADD_DEVICE_NOTIFICATION,
+            sizeof(*pNotification),
+            pNotification,
+            nullptr,
+            sizeof(AdsAddDeviceNotificationRequest)
+        };
+        request.frame.prepend(AdsAddDeviceNotificationRequest{
+            indexGroup,
+            indexOffset,
+            pAttrib->cbLength,
+            pAttrib->nTransMode,
+            pAttrib->nMaxDelay,
+            pAttrib->nCycleTime
+            });
+        return GetRouter().AdsRequest(request);
+    }
+    catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     }
 }

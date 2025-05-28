@@ -8,9 +8,9 @@
 #include "AdsLib.h"
 #include <limits>
 
-static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
+static AmsNetId* AddRoute(AmsNetId ams, const char* ip, ReceiveNotificationFunc onNotification = nullptr)
 {
-    const auto error = bhf::ads::AddLocalRoute(ams, ip);
+    const auto error = bhf::ads::AddLocalRoute(ams, ip, onNotification);
     if (error) {
         throw AdsException(error);
     }

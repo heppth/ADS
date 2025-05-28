@@ -363,6 +363,8 @@ struct AdsNotificationHeader {
 typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
                                         uint32_t hUser);
 
+typedef void (*ReceiveNotificationFunc)(uint8_t* pBuffer, uint32_t length);
+
 #define ADSSYMBOLFLAG_PERSISTENT    ((uint32_t)(1 << 0))
 #define ADSSYMBOLFLAG_BITVALUE      ((uint32_t)(1 << 1))
 #define ADSSYMBOLFLAG_REFERENCETO   ((uint32_t)(1 << 2))

@@ -12,19 +12,7 @@ AmsRouter::AmsRouter(AmsNetId netId)
     : localAddr(netId)
 {}
 
-long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
-{
-    /**
-     * We keep this madness only for backwards compatibility, to give
-     * downstream projects time to migrate to the much saner interface.
-     */
-    struct in_addr addr;
-    static_assert(sizeof(addr) == sizeof(ip), "Oops sizeof(IpV4) doesn't match sizeof(in_addr)");
-    memcpy(&addr, &ip.value, sizeof(addr));
-    return AddRoute(ams, std::string(inet_ntoa(addr)));
-}
-
-long AmsRouter::AddRoute(AmsNetId ams, const std::string& host)
+long AmsRouter::AddRoute(AmsNetId ams, const std::string& host, ReceiveNotificationFunc onNotification = nullptr)
 {
     /**
         DNS lookups are pretty time consuming, we shouldn't do them
@@ -58,7 +46,7 @@ long AmsRouter::AddRoute(AmsNetId ams, const std::string& host)
     lock.unlock();
 
     try {
-        auto new_connection = std::unique_ptr<AmsConnection>(new AmsConnection { *this, hostAddresses.get()});
+        auto new_connection = std::unique_ptr<AmsConnection>(new AmsConnection { *this, hostAddresses.get(), onNotification});
         lock.lock();
         connection_attempts.erase(ams);
         connection_attempt_events.notify_all();
