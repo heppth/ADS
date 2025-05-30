@@ -10,12 +10,16 @@
 
 #define asHex(X) "0x" << std::hex << (int)(X)
 
+#ifdef _DEBUG
 #define LOG(LEVEL, ARGS) \
     do { \
         std::stringstream stream; \
         stream << ARGS; \
         Logger::Log(LEVEL, stream.str()); \
     } while (0)
+#else
+#define LOG(LEVEL, ARGS)
+#endif
 
 #define LOG_VERBOSE(ARGS) LOG(0, ARGS)
 #define LOG_INFO(ARGS) LOG(1, ARGS)
