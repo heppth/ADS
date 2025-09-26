@@ -140,6 +140,10 @@ long AdsSyncAddDeviceNotificationReqLite(long                         port,
                                        const AdsNotificationAttrib* pAttrib,
                                        uint32_t*                    pNotification);
 
+long AdsSyncDelDeviceNotificationReqLite(long port,
+                                        const AmsAddr* pAddr,
+                                        uint32_t hNotification);
+
 /**
  * A notification defined previously is deleted from an ADS server.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().

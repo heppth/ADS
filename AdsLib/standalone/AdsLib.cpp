@@ -338,6 +338,34 @@ long AdsSyncAddDeviceNotificationReqLite(long                         port,
     }
 }
 
+long AdsSyncDelDeviceNotificationReqLite(
+    long port,
+    const AmsAddr* pAddr,
+    uint32_t hNotification)
+{
+    ASSERT_PORT_AND_AMSADDR(port, pAddr);
+
+    try {
+        AmsRequest request{
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::DEL_DEVICE_NOTIFICATION,
+            0,          // erwartete Antwortgröße = 0
+            nullptr,    // kein Response-Puffer
+            nullptr,    // kein UserData
+            sizeof(hNotification) // Größe der Nutzlast
+        };
+
+        // Payload: nur die 4-Byte NotificationHandle
+        request.frame.prepend(bhf::ads::htole(hNotification));
+
+        return GetRouter().AdsRequest(request);
+    }
+    catch (const std::bad_alloc&) {
+        return GLOBALERR_NO_MEMORY;
+    }
+}
+
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
