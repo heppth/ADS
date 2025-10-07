@@ -85,7 +85,7 @@ private:
 };
 
 struct AmsConnection {
-    AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
+    AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" }, ReceiveNotificationFunc onNotification = nullptr);
     ~AmsConnection();
 
     SharedDispatcher CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification);
@@ -100,6 +100,7 @@ private:
     std::atomic<size_t> refCount;
     std::atomic<uint32_t> invokeId;
     std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
+    ReceiveNotificationFunc customNotificationHandler;
 
     template<class T> void ReceiveFrame(AmsResponse* response, size_t length, uint32_t aoeError) const;
     bool ReceiveNotification(const AoEHeader& header);

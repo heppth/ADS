@@ -8,9 +8,9 @@
 #include "AdsLib.h"
 #include "wrap_endian.h"
 
-static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
+static AmsNetId* AddRoute(AmsNetId ams, const char* ip, ReceiveNotificationFunc onNotification = nullptr)
 {
-    const auto error = AdsAddRoute(ams, ip);
+    const auto error = AdsAddRoute(ams, ip, onNotification);
     if (error) {
         throw AdsException(error);
     }

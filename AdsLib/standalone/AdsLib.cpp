@@ -42,10 +42,10 @@ static AmsRouter& GetRouter()
         } \
 } while (false)
 
-long AdsAddRoute(const AmsNetId ams, const char* ip)
+long AdsAddRoute(const AmsNetId ams, const char* ip, ReceiveNotificationFunc onNotification)
 {
     try {
-        return GetRouter().AddRoute(ams, IpV4(ip));
+        return GetRouter().AddRoute(ams, IpV4(ip), onNotification);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     } catch (const std::runtime_error&) {
@@ -312,10 +312,75 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
     }
 }
 
+long AdsSyncAddDeviceNotificationReqLite(long                         port,
+    const AmsAddr* pAddr,
+    uint32_t                     indexGroup,
+    uint32_t                     indexOffset,
+    const AdsNotificationAttrib* pAttrib,
+    uint32_t* pNotification)
+{
+    ASSERT_PORT_AND_AMSADDR(port, pAddr);
+    if (!pAttrib) {
+        return ADSERR_CLIENT_INVALIDPARM;
+    }
+
+    try {
+        AmsRequest request{
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::ADD_DEVICE_NOTIFICATION,
+            sizeof(*pNotification),
+            pNotification,
+            nullptr,
+            sizeof(AdsAddDeviceNotificationRequest)
+        };
+        request.frame.prepend(AdsAddDeviceNotificationRequest{
+            indexGroup,
+            indexOffset,
+            pAttrib->cbLength,
+            pAttrib->nTransMode,
+            pAttrib->nMaxDelay,
+            pAttrib->nCycleTime
+            });
+        return GetRouter().AdsRequest(request);
+    }
+    catch (const std::bad_alloc&) {
+        return GLOBALERR_NO_MEMORY;
+    }
+}
+
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
     return GetRouter().DelNotification((uint16_t)port, pAddr, hNotification);
+}
+
+long AdsSyncDelDeviceNotificationReqLite(
+    long port,
+    const AmsAddr* pAddr,
+    uint32_t hNotification)
+{
+    ASSERT_PORT_AND_AMSADDR(port, pAddr);
+
+    try {
+        AmsRequest request{
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::DEL_DEVICE_NOTIFICATION,
+            0,          // erwartete Antwortgröße = 0
+            nullptr,    // kein Response-Puffer
+            nullptr,    // kein UserData
+            sizeof(hNotification) // Größe der Nutzlast
+        };
+
+        // Payload: nur die 4-Byte NotificationHandle
+        request.frame.prepend(qToLittleEndian(hNotification));
+
+        return GetRouter().AdsRequest(request);
+    }
+    catch (const std::bad_alloc&) {
+        return GLOBALERR_NO_MEMORY;
+    }
 }
 
 long AdsSyncGetTimeoutEx(long port, uint32_t* timeout)

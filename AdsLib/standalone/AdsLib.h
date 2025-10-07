@@ -12,7 +12,7 @@
  * @param[in] ip address of the target system
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsAddRoute(AmsNetId ams, const char* ip);
+long AdsAddRoute(AmsNetId ams, const char* ip, ReceiveNotificationFunc onNotification);
 
 /**
  * Delete ams route that had previously been added with AdsAddRoute().

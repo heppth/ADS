@@ -129,6 +129,13 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
                                        uint32_t                     hUser,
                                        uint32_t*                    pNotification);
 
+long AdsSyncAddDeviceNotificationReqLite(long                       port,
+                                       const AmsAddr*               pAddr,
+                                       uint32_t                     indexGroup,
+                                       uint32_t                     indexOffset,
+                                       const AdsNotificationAttrib* pAttrib,
+                                       uint32_t*                    pNotification);
+
 /**
  * A notification defined previously is deleted from an ADS server.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
@@ -137,6 +144,8 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification);
+
+long AdsSyncDelDeviceNotificationReqLite(long port, const AmsAddr* pAddr, uint32_t hNotification);
 
 /**
  * Read the configured timeout for the ADS functions. The standard value is 5000 ms.
