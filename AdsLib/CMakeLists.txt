@@ -1,6 +1,7 @@
 set(SOURCES
   AdsDevice.cpp
   AdsDef.cpp
+  AdsDefStream.cpp
   Log.cpp
   Sockets.cpp
   Frame.cpp

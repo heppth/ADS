@@ -22,8 +22,6 @@
 
 #include "AdsDef.h"
 
-#include <ostream>
-#include <sstream>
 #include <stdlib.h>
 #include <string.h>
 
@@ -45,25 +43,29 @@ bool operator<(const AmsAddr& lhs, const AmsAddr& rhs)
     return lhs.port < rhs.port;
 }
 
-std::ostream& operator<<(std::ostream& os, const AmsNetId& netId)
-{
-    return os << std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' <<
-           (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5];
-}
-
 AmsNetId make_AmsNetId(const std::string& addr)
 {
-    std::istringstream iss(addr);
-    std::string s;
+    // Handwritten parser instead of std::istringstream/std::getline:
+    // the stream classes pull the complete libstdc++ locale/iostream code (~400 KB) into static binaries.
+    // Semantics are identical to the former getline('.') loop.
+    const char* p = addr.c_str();
+    const char* const end = p + addr.size();
     size_t i = 0;
     AmsNetId id {};
 
-    while ((i < sizeof(id.b)) && std::getline(iss, s, '.')) {
-        id.b[i] = atoi(s.c_str()) % 256;
+    while ((i < sizeof(id.b)) && (p != end)) {
+        const char* dot = static_cast<const char*>(memchr(p, '.', static_cast<size_t>(end - p)));
+        const char* const tokenEnd = dot ? dot : end;
+        char token[16];
+        const size_t len = static_cast<size_t>(tokenEnd - p) < sizeof(token) - 1 ? static_cast<size_t>(tokenEnd - p) : sizeof(token) - 1;
+        memcpy(token, p, len);
+        token[len] = '\0';
+        id.b[i] = atoi(token) % 256;
         ++i;
+        p = dot ? dot + 1 : end;
     }
 
-    if ((i != sizeof(id.b)) || std::getline(iss, s, '.')) {
+    if ((i != sizeof(id.b)) || (p != end)) {
         memset(id.b, 0, sizeof(id.b));
     }
     return id;

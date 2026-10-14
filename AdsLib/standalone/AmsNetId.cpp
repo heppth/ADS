@@ -5,7 +5,6 @@
 
 #include "AdsDef.h"
 #include <string.h>
-#include <sstream>
 
 AmsNetId::AmsNetId(uint32_t ipv4Addr)
 {
@@ -27,21 +26,13 @@ AmsNetId::AmsNetId(uint8_t id_0, uint8_t id_1, uint8_t id_2, uint8_t id_3, uint8
     b[0] = id_0;
 }
 
+// Implemented in AdsLib/AdsDef.cpp
+AmsNetId make_AmsNetId(const std::string& addr);
+
 AmsNetId::AmsNetId(const std::string& addr)
 {
-    std::istringstream iss(addr);
-    std::string s;
-    size_t i = 0;
-
-    while ((i < sizeof(b)) && std::getline(iss, s, '.')) {
-        b[i] = atoi(s.c_str()) % 256;
-        ++i;
-    }
-
-    if ((i != sizeof(b)) || std::getline(iss, s, '.')) {
-        static const AmsNetId empty {};
-        memcpy(b, empty.b, sizeof(b));
-    }
+    // Parsing without iostream, see AdsDef.cpp
+    *this = make_AmsNetId(addr);
 }
 
 AmsNetId::operator bool() const
